@@ -5,26 +5,32 @@ from src.feature_engineering import scale_data
 from src.model import build_pipeline, tune_model
 from src.evaluation import evaluate
 
-# Load
-df = load_data()
 
-# Preprocess
-df = preprocess(df)
-X, y = encode_features(df)
+def main():
+    # Load
+    df = load_data()
 
-# Split
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
-)
+    # Preprocess
+    df = preprocess(df)
+    X, y = encode_features(df)
 
-# Scale
-X_train_scaled, X_test_scaled = scale_data(X_train, X_test)
+    # Split
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
 
-# Model
-pipe = build_pipeline()
-best_model, params = tune_model(pipe, X_train_scaled, y_train)
+    # Scale
+    X_train_scaled, X_test_scaled = scale_data(X_train, X_test)
 
-print("Best parameters:", params)
+    # Model
+    pipe = build_pipeline()
+    best_model, params = tune_model(pipe, X_train_scaled, y_train)
 
-# Evaluate
-evaluate(best_model, X_test_scaled, y_test)
+    print("Best parameters:", params)
+
+    # Evaluate
+    evaluate(best_model, X_test_scaled, y_test)
+
+
+if __name__ == "__main__":
+    main()
