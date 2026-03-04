@@ -2,22 +2,25 @@ from sklearn.metrics import classification_report, confusion_matrix, accuracy_sc
 from sklearn.model_selection import cross_val_score
 import numpy as np
 
-def evaluate(model, X_train, y_train, X_test, y_test, cv_folds=5):
+def evaluate(model, X_train, y_train, X_test, y_test):
     """
-    Produces the Classification Table PLUS the Cross-Validation Stability Report.
+    Performs Test-set Evaluation AND Cross-Validation for Research.
     """
+    # 1. Individual Test Set Performance
     y_pred = model.predict(X_test)
-
+    
     print("\n--- Test Set Classification Report ---")
     print(classification_report(y_test, y_pred))
 
-    print(f"\n--- {cv_folds}-Fold Cross-Validation Report ---")
-    cv_scores = cross_val_score(model, X_train, y_train, cv=cv_folds)
+    # 2. CROSS-VALIDATION (The part you need for your Research Bio)
+    print("\n--- 5-Fold Cross-Validation Report ---")
+    cv_scores = cross_val_score(model, X_train, y_train, cv=5)
     
-    print(f"Individual Fold Accuracies: {np.round(cv_scores, 3)}")
-    print(f"Mean CV Accuracy: {cv_scores.mean():.2f} (+/- {cv_scores.std() * 2:.2f})")
+    print(f"Fold Accuracies: {np.round(cv_scores, 3)}")
+    print(f"Mean Accuracy: {cv_scores.mean():.2f} (+/- {cv_scores.std() * 2:.2f})")
 
+    # 3. Confusion Matrix
     cm = confusion_matrix(y_test, y_pred)
     print("\nConfusion Matrix:\n", cm)
 
-    return y_pred, cm, cv_scores
+    return y_pred, cm
