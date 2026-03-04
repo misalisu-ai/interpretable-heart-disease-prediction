@@ -4,7 +4,8 @@ from src.preprocessing import preprocess, encode_features
 from src.feature_engineering import scale_data
 from src.model import build_pipeline, tune_model
 from src.evaluation import evaluate
-
+import joblib
+import os
 
 def main():
     # Load
@@ -34,3 +35,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Save trained model
+os.makedirs("models", exist_ok=True)
+joblib.dump(best_model, "models/heart_disease_model.pkl")
+print("Model saved to models/heart_disease_model.pkl")
