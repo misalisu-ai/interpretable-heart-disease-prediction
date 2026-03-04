@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import shap
+import matplotlib.pyplot as plt
 
 st.title("Interpretable Heart Disease Risk Classifier")
 
@@ -46,15 +48,6 @@ if st.button("Predict"):
     prediction = model.predict(input_df)[0]
     probabilities = model.predict_proba(input_df)[0]
 
-    st.subheader("Prediction")
-
-    if prediction == 0:
-        st.success("No Disease")
-    elif prediction == 1:
-        st.warning("Mild Disease")
-    else:
-        st.error("Severe Disease")
-
     st.subheader("Prediction Probabilities")
 
     prob_df = pd.DataFrame({
@@ -63,3 +56,19 @@ if st.button("Predict"):
     })
 
     st.bar_chart(prob_df.set_index("Class"))
+
+        st.subheader("Model Explanation (SHAP)")
+
+    # Transform input through RFE
+    X_selected = model.named_steps['rfe'].transform(input_df)
+
+    explainer = shap.Explainer(
+        model.named_steps['logreg'],
+        X_selected
+    )
+
+    shap_values = explainer(X_selected)
+
+    fig, ax = plt.subplots()
+    shap.plots.waterfall(shap_values[0], show=False)
+    st.pyplot(fig)
