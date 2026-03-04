@@ -8,35 +8,28 @@ import joblib
 import os
 
 def main():
-    # Load
-    df = load_data()
 
-    # Preprocess
+    df = load_data()
     df = preprocess(df)
     X, y = encode_features(df)
 
-    # Split
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y
     )
 
-    # Scale
     X_train_scaled, X_test_scaled = scale_data(X_train, X_test)
 
-    # Model
     pipe = build_pipeline()
     best_model, params = tune_model(pipe, X_train_scaled, y_train)
 
+    print("\n--- Tuning Results ---")
     print("Best parameters:", params)
 
-    # Evaluate
-    evaluate(best_model, X_test_scaled, y_test)
+    evaluate(best_model, X_train_scaled, y_train, X_test_scaled, y_test)
 
+    os.makedirs("models", exist_ok=True)
+    joblib.dump(best_model, "models/heart_disease_model.pkl")
+    print("\n Model saved to models/heart_disease_model.pkl")
 
 if __name__ == "__main__":
     main()
-
-# Save trained model
-os.makedirs("models", exist_ok=True)
-joblib.dump(best_model, "models/heart_disease_model.pkl")
-print("Model saved to models/heart_disease_model.pkl")
