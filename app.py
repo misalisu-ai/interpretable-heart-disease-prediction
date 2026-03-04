@@ -42,7 +42,11 @@ input_dict = {
 input_df = pd.DataFrame(input_dict)
 
 if st.button("Predict"):
+
     prediction = model.predict(input_df)[0]
+    probabilities = model.predict_proba(input_df)[0]
+
+    st.subheader("Prediction")
 
     if prediction == 0:
         st.success("No Disease")
@@ -50,3 +54,12 @@ if st.button("Predict"):
         st.warning("Mild Disease")
     else:
         st.error("Severe Disease")
+
+    st.subheader("Prediction Probabilities")
+
+    prob_df = pd.DataFrame({
+        "Class": ["No Disease", "Mild Disease", "Severe Disease"],
+        "Probability": probabilities
+    })
+
+    st.bar_chart(prob_df.set_index("Class"))
