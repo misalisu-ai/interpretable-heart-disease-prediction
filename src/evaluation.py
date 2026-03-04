@@ -2,21 +2,19 @@ from sklearn.metrics import classification_report, confusion_matrix, accuracy_sc
 from sklearn.model_selection import cross_val_score
 import numpy as np
 
-def evaluate(model, X, y, X_test, y_test, cv_folds=5):
+def evaluate(model, X_train, y_train, X_test, y_test, cv_folds=5):
     """
-    Performs both a specific test-set evaluation and a 
-    generalized Cross-Validation report.
+    Produces the Classification Table PLUS the Cross-Validation Stability Report.
     """
     y_pred = model.predict(X_test)
-    
-    print("--- Single Test Set Evaluation ---")
-    print(f"Test Accuracy: {accuracy_score(y_test, y_pred):.2f}")
-    print("\nClassification Report:\n", classification_report(y_test, y_pred))
 
-    cv_scores = cross_val_score(model, X, y, cv=cv_folds)
+    print("\n--- Test Set Classification Report ---")
+    print(classification_report(y_test, y_pred))
+
+    print(f"\n--- {cv_folds}-Fold Cross-Validation Report ---")
+    cv_scores = cross_val_score(model, X_train, y_train, cv=cv_folds)
     
-    print(f"\n--- {cv_folds}-Fold Cross-Validation ---")
-    print(f"Scores: {np.round(cv_scores, 3)}")
+    print(f"Individual Fold Accuracies: {np.round(cv_scores, 3)}")
     print(f"Mean CV Accuracy: {cv_scores.mean():.2f} (+/- {cv_scores.std() * 2:.2f})")
 
     cm = confusion_matrix(y_test, y_pred)
