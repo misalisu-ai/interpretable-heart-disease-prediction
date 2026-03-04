@@ -25,7 +25,7 @@ def tune_model(pipe, X_train, y_train):
         'logreg__C': [0.1, 1, 10]
     }
 
-    cv = StratifiedKFold(n_splits=3)
+    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
     grid = GridSearchCV(
         pipe,
@@ -36,4 +36,17 @@ def tune_model(pipe, X_train, y_train):
     )
 
     grid.fit(X_train, y_train)
+
+    # Cross-validation report
+    cv_scores = cross_val_score(
+        grid.best_estimator_,
+        X_train,
+        y_train,
+        cv=cv,
+        scoring='f1_macro'
+    )
+
+    print("Cross-validation F1-macro scores:", cv_scores)
+    print("Mean CV F1-macro:", np.mean(cv_scores))
+
     return grid.best_estimator_, grid.best_params_
