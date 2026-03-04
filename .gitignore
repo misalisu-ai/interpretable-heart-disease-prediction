@@ -1,6 +1,5 @@
 __pycache__/
 *.pyc
 *.pkl
-figures/
 .env
-.ipynb_checkpoints/
+
