@@ -70,6 +70,7 @@ if st.button("Predict"):
         st.bar_chart(prob_df.set_index("Class"))
 
         # 4. Model Explanation (SHAP) - MUST stay inside the button block
+                # 4. Model Explanation (SHAP)
         st.subheader("Model Explanation (SHAP)")
         
         # Pass the 28 features through the RFE step
@@ -79,10 +80,17 @@ if st.button("Predict"):
             model.named_steps['logreg'],
             X_selected
         )
+        
+        # This returns a 3D array: [observations, features, classes]
         shap_values = explainer(X_selected)
 
+        # Let's explain the "Most Likely" class predicted by the model
+        predicted_class_index = int(prediction[0]) 
+        
         fig, ax = plt.subplots()
-        shap.plots.waterfall(shap_values[0], show=False)
+        # We take [0] for the first patient, and [predicted_class_index] for the class
+        shap.plots.waterfall(shap_values[0, :, predicted_class_index], show=False)
+        
         st.pyplot(fig)
 
     except ValueError as e:
