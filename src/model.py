@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_selection import RFE
 from imblearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 from imblearn.over_sampling import SMOTE
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 
@@ -14,6 +15,7 @@ def build_pipeline():
     )
 
     pipe = Pipeline([
+        ('scaler', StandardScaler()),
         ('rfe', RFE(estimator=LogisticRegression())),
         ('smote', SMOTE(random_state=42)),
         ('logreg', logreg)
