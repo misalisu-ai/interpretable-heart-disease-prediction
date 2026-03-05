@@ -49,6 +49,10 @@ if st.button("Predict"):
         # 1. Transform 13 raw inputs into 28 encoded features
         df_temp = preprocess(input_df)
         X_input, _ = encode_features(df_temp)
+
+        training_columns = model.feature_names_in_ 
+
+        X_input = X_input.reindex(columns=training_columns, fill_value=0)
         
         # 2. Prediction (Corrected to X_input)
         prediction = model.predict(X_input)[0]
