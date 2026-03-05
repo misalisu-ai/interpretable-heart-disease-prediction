@@ -85,7 +85,7 @@ if st.button("Predict"):
         shap_values = explainer(X_selected)
 
         # Let's explain the "Most Likely" class predicted by the model
-        predicted_class_index = int(prediction[0]) 
+        predicted_class_index = int(prediction) 
         
         fig, ax = plt.subplots()
         # We take [0] for the first patient, and [predicted_class_index] for the class
