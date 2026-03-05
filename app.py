@@ -57,7 +57,7 @@ if st.button("Predict"):
 
     st.bar_chart(prob_df.set_index("Class"))
 
-        st.subheader("Model Explanation (SHAP)")
+    st.subheader("Model Explanation (SHAP)")
 
     # Transform input through RFE
     X_selected = model.named_steps['rfe'].transform(input_df)
