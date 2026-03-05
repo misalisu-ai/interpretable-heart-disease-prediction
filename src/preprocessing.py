@@ -21,8 +21,19 @@ def merge_classes(x):
     return 2
 
 def encode_features(df):
-    df['target_multi'] = df['target'].apply(merge_classes)
-    X = pd.get_dummies(df.drop(['target','target_multi'], axis=1),
-                       columns=CATEGORICAL)
-    y = df['target_multi']
+    # 1. Handle Target (Only if it exists)
+    if 'target' in df.columns:
+        df['target_multi'] = df['target'].apply(merge_classes)
+        y = df['target_multi']
+        # Drop both targets for X
+        drop_cols = ['target', 'target_multi']
+    else:
+        y = None
+        drop_cols = ['target'] # Only drop if it exists
+
+    # 2. Generate Features (X)
+    # errors='ignore' prevents a crash if 'target' isn't there
+    X = pd.get_dummies(df.drop(drop_cols, axis=1, errors='ignore'), 
+                       columns=[col for col in CATEGORICAL if col in df.columns])
+    
     return X, y
