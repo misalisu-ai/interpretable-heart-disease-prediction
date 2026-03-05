@@ -69,29 +69,39 @@ if st.button("Predict"):
         })
         st.bar_chart(prob_df.set_index("Class"))
 
-        # 4. Model Explanation (SHAP) - MUST stay inside the button block
-                # 4. Model Explanation (SHAP)
+        # 4. Model Explanation (SHAP) 
+                
         st.subheader("Model Explanation (SHAP)")
         
-        # Pass the 28 features through the RFE step
-        X_selected = model.named_steps['rfe'].transform(X_input)
-
-        explainer = shap.Explainer(
-            model.named_steps['logreg'],
-            X_selected
-        )
+        # Get the names of the 10 features selected by RFE
+        rfe_step = model.named_steps['rfe']
+        selected_features = X_input.columns[rfe_step.support_]
         
-        # This returns a 3D array: [observations, features, classes]
-        shap_values = explainer(X_selected)
-
-        # Let's explain the "Most Likely" class predicted by the model
-        predicted_class_index = int(prediction) 
+        # Transform X_input and turn it into a DataFrame with actual names
+        X_selected = rfe_step.transform(X_input)
+        X_selected_df = pd.DataFrame(X_selected, columns=selected_features)
+        
+        # For a better baseline, we use the training model's logic
+        # We select the Logistic Regression part of your pipeline
+        logreg_model = model.named_steps['logreg']
+        
+        # Create the explainer
+        # Note: In research, we usually pass a background dataset here, 
+        # but providing the named DataFrame helps SHAP find the labels.
+        explainer = shap.Explainer(logreg_model, X_selected_df)
+        shap_values = explainer(X_selected_df)
+        
+        # Explain the predicted class
+        predicted_class_index = int(prediction)
         
         fig, ax = plt.subplots()
-        # We take [0] for the first patient, and [predicted_class_index] for the class
+        # [0] for the patient, [:] for features, [index] for the disease stage
         shap.plots.waterfall(shap_values[0, :, predicted_class_index], show=False)
         
+        # Clean up the plot for your portfolio
+        plt.title(f"Explanation for {prob_df['Class'][predicted_class_index]}")
         st.pyplot(fig)
+
 
     except ValueError as e:
         st.error(f"Feature Mismatch Error: {e}")
