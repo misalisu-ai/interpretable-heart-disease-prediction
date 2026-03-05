@@ -3,6 +3,7 @@ import pandas as pd
 import joblib
 import shap
 import matplotlib.pyplot as plt
+from src.preprocessing import preprocess, encode_features
 
 st.title("Interpretable Heart Disease Risk Classifier")
 
@@ -44,31 +45,42 @@ input_dict = {
 input_df = pd.DataFrame(input_dict)
 
 if st.button("Predict"):
+    try: 
+        # 1. Transform 13 raw inputs into 28 encoded features
+        df_temp = preprocess(input_df)
+        X_input, _ = encode_features(df_temp)
+        
+        # 2. Prediction (Corrected to X_input)
+        prediction = model.predict(X_input)[0]
+        probabilities = model.predict_proba(X_input)[0]
 
-    prediction = model.predict(input_df)[0]
-    probabilities = model.predict_proba(input_df)[0]
+        st.subheader("Prediction Results")
+        result_text = "No Disease" if prediction == 0 else "Heart Disease Detected"
+        st.info(f"Final Prediction: **{result_text}**")
 
-    st.subheader("Prediction Probabilities")
+        # 3. Probability Bar Chart
+        prob_df = pd.DataFrame({
+            "Class": ["No Disease", "Mild Disease", "Severe Disease"],
+            "Probability": probabilities
+        })
+        st.bar_chart(prob_df.set_index("Class"))
 
-    prob_df = pd.DataFrame({
-        "Class": ["No Disease", "Mild Disease", "Severe Disease"],
-        "Probability": probabilities
-    })
+        # 4. Model Explanation (SHAP) - MUST stay inside the button block
+        st.subheader("Model Explanation (SHAP)")
+        
+        # Pass the 28 features through the RFE step
+        X_selected = model.named_steps['rfe'].transform(X_input)
 
-    st.bar_chart(prob_df.set_index("Class"))
+        explainer = shap.Explainer(
+            model.named_steps['logreg'],
+            X_selected
+        )
+        shap_values = explainer(X_selected)
 
-    st.subheader("Model Explanation (SHAP)")
+        fig, ax = plt.subplots()
+        shap.plots.waterfall(shap_values[0], show=False)
+        st.pyplot(fig)
 
-    # Transform input through RFE
-    X_selected = model.named_steps['rfe'].transform(input_df)
-
-    explainer = shap.Explainer(
-        model.named_steps['logreg'],
-        X_selected
-    )
-
-    shap_values = explainer(X_selected)
-
-    fig, ax = plt.subplots()
-    shap.plots.waterfall(shap_values[0], show=False)
-    st.pyplot(fig)
+    except ValueError as e:
+        st.error(f"Feature Mismatch Error: {e}")
+        st.write("Ensure your encode_features function creates the exact columns used in training.")
