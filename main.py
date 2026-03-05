@@ -22,7 +22,7 @@ def main():
     print("\n--- Tuning Results ---")
     print("Best parameters:", params)
 
-    evaluate(best_model, X_train_scaled, y_train, X_test_scaled, y_test)
+    evaluate(best_model, X_train, y_train, X_test, y_test)
 
     os.makedirs("models", exist_ok=True)
     joblib.dump(best_model, "models/heart_disease_model.pkl")
